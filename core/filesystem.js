@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import fsPromises from 'fs/promises';
 import { constants } from 'fs';
 
-export async function cmd_cat(working_directory, args){
+export function cmd_cat(working_directory, args){
     // Read file and print it's content in console (should be done using Readable stream):
     // cat path_to_file
     if (args.length > 1) {
@@ -32,7 +32,7 @@ export async function cmd_cat(working_directory, args){
 }
 
 
-export async function cmd_add(working_directory, args){
+export function cmd_add(working_directory, args){
     // Create empty file in current working directory:
     // add new_file_name
 
@@ -63,7 +63,7 @@ export async function cmd_add(working_directory, args){
     });
 }
 
-export async function cmd_rn(working_directory, args){
+export function cmd_rn(working_directory, args){
     //Rename file (content should remain unchanged):
     // rn path_to_file new_filename
 
@@ -87,13 +87,13 @@ export async function cmd_rn(working_directory, args){
     const full_path_to_old_file = path.join(old_dir, old_file_name);
     const full_path_to_new_file = path.join(old_dir, new_file_name);
     let is_error = false
-    await fsPromises.stat(full_path_to_old_file).catch(error => {
+    fsPromises.stat(full_path_to_old_file).catch(error => {
         console.log(`The file ${old_file_name} doesn't exist.`);
         is_error = true;
     });
     if (is_error) return;
 
-    await fsPromises.stat(full_path_to_new_file).then(() => {
+    fsPromises.stat(full_path_to_new_file).then(() => {
         console.log(`The file ${new_file_name} already exist.`);
         is_error = true;
     }).catch((error) => {
@@ -104,14 +104,14 @@ export async function cmd_rn(working_directory, args){
 
     if (is_error) return;
 
-    await fsPromises.rename(old_file_name, new_file_name).catch((error) => {
+    fsPromises.rename(old_file_name, new_file_name).catch((error) => {
         if (error.code === 'ENOENT'){
             console.log(`${error.message}`);
         }
     });
 }
 
-export async function cmd_cp(working_directory, args){
+export function cmd_cp(working_directory, args){
     //cp path_to_file path_to_new_directory
     //Copy file (should be done using Readable and Writable streams):
 
@@ -132,19 +132,19 @@ export async function cmd_cp(working_directory, args){
     const destination_path_to_file = path.join(destination_directory, path.basename(init_path_to_file));
 
 
-    await fsPromises.stat(init_path_to_file).catch(error => {
+    fsPromises.stat(init_path_to_file).catch(error => {
         is_error = true;
     });
     if (is_error) return;
 
-    await fsPromises.stat(destination_directory).catch(error => {
+    fsPromises.stat(destination_directory).catch(error => {
         is_error = true;
         console.log(error.message);
     });
     if (is_error) return;
 
     console.log("we are gete")
-    await fsPromises.copyFile(init_path_to_file, destination_path_to_file, constants.COPYFILE_EXCL)
+    fsPromises.copyFile(init_path_to_file, destination_path_to_file, constants.COPYFILE_EXCL)
         .catch(error => {
             if (error.code === "ERR_FS_CP_EEXIST") {
                 console.error("The file already exist");
@@ -158,7 +158,7 @@ export async function cmd_cp(working_directory, args){
         });
 }
 
-export async function cmd_mv(working_directory, args){
+export function cmd_mv(working_directory, args){
     // Move file (same as copy but initial file is deleted,
     // copying part should be done using Readable and Writable streams):
     // mv path_to_file path_to_new_directory
@@ -179,13 +179,13 @@ export async function cmd_mv(working_directory, args){
     const destination_directory = args[1];
     const destination_path_to_file = path.join(destination_directory, path.basename(source_path_to_file));
 
-    await fsPromises.stat(source_path_to_file).catch(error => {
+    fsPromises.stat(source_path_to_file).catch(error => {
         is_error = true;
         console.log(`something go wrong ${error.message}`);
     });
     if (is_error) return;
 
-    await fsPromises.stat(destination_path_to_file).then(() => {
+    fsPromises.stat(destination_path_to_file).then(() => {
         is_error = true;
         console.log("The file already exist");
     }).catch((error) => {
@@ -207,7 +207,7 @@ export async function cmd_mv(working_directory, args){
         reject(`Error writing destination file: ${error.message}`);
     });
 
-    await writeStream.on('close', () => {
+    writeStream.on('close', () => {
             fs.unlink(source_path_to_file, (err) => {
                 if (err) {
                     Promise.reject(`Error deleting source file: ${err.message}`);
@@ -217,11 +217,11 @@ export async function cmd_mv(working_directory, args){
             });
         });
 
-    await readStream.pipe(writeStream);
+    readStream.pipe(writeStream);
 }
 
 
-export async function cmd_rm(working_directory, args){
+export function cmd_rm(working_directory, args){
     // Delete file:
     // rm path_to_file
 
@@ -239,14 +239,14 @@ export async function cmd_rm(working_directory, args){
     let is_error = false;
     const file_to_remove = args[0];
 
-    await fsPromises.stat(file_to_remove).catch(error => {
+    fsPromises.stat(file_to_remove).catch(error => {
         is_error = true;
         console.log(`something go wrong ${error.message}`);
     });
     if (is_error) return;
 
     // remove action.
-    await fsPromises.unlink(file_to_remove);
+    fsPromises.unlink(file_to_remove);
 }
 
 

@@ -6,7 +6,7 @@ import { pipeline } from 'node:stream/promises';
 import path from "path";
 import remove_last_extension from "./parser.js"
 
-export async function cmd_hash(working_directory, args){
+export function cmd_hash(working_directory, args){
     // Calculate hash for file and print it into console
     // hash path_to_file
 
@@ -24,7 +24,7 @@ export async function cmd_hash(working_directory, args){
     const file_path = args[0];
 
     // hash action.
-    await fsPromises.stat(file_path).then(() => {
+    fsPromises.stat(file_path).then(() => {
             fsPromises.readFile(file_path).then(file_buffer => {
                 const hash = createHash('sha256').update(file_buffer).digest('hex');
                 console.log(hash);
@@ -34,7 +34,7 @@ export async function cmd_hash(working_directory, args){
     });
 }
 
-export async function cmd_compress(working_directory, args){
+export function cmd_compress(working_directory, args){
     // Compress file (using Brotli algorithm, should be done using Streams API)
     // compress path_to_file path_to_destination
 
@@ -53,13 +53,13 @@ export async function cmd_compress(working_directory, args){
     const path_to_destination = args[1];
 
     let is_error = false;
-    await fsPromises.stat(path_to_file).catch(error => {
+    fsPromises.stat(path_to_file).catch(error => {
         is_error = true;
         console.log(`something go wrong ${error.message}`);
     });
     if (is_error) return;
 
-    await fsPromises.stat(path_to_destination).catch(error => {
+    fsPromises.stat(path_to_destination).catch(error => {
         is_error = true;
         console.log(`something go wrong ${error.message}`);
     });
@@ -67,13 +67,13 @@ export async function cmd_compress(working_directory, args){
     const archive_file = path.join(path_to_destination, path.basename(path_to_file) + ".gz");
 
     // compress action.
-    await pipeline(
+    pipeline(
       fs.createReadStream(path_to_file),
       zlib.createGzip(),
       fs.createWriteStream(archive_file)
     );
 }
-export async function cmd_decompress(working_directory, args){
+export function cmd_decompress(working_directory, args){
     // Decompress file (using Brotli algorithm, should be done using Streams API)
     // decompress path_to_file path_to_destination
 
@@ -92,13 +92,13 @@ export async function cmd_decompress(working_directory, args){
     const output_path = args[1];
 
     let is_error = false;
-    await fsPromises.stat(archive_path).catch(error => {
+    fsPromises.stat(archive_path).catch(error => {
         is_error = true;
         console.log(`something go wrong ${error.message}`);
     });
     if (is_error) return;
 
-    await fsPromises.stat(output_path).catch(error => {
+    fsPromises.stat(output_path).catch(error => {
         is_error = true;
         console.log(`something go wrong ${error.message}`);
     });
@@ -110,5 +110,5 @@ export async function cmd_decompress(working_directory, args){
     const sourceStream = fs.createReadStream(archive_path);
     const gunzipStream = zlib.createGunzip();
     const destinationStream = fs.createWriteStream(output_file);
-    await pipeline(sourceStream, gunzipStream, destinationStream);
+    pipeline(sourceStream, gunzipStream, destinationStream);
 }

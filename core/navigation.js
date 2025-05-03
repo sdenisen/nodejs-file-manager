@@ -1,6 +1,9 @@
 import path from 'path';
-import {readdir} from "fs/promises";
-import fs from "fs";
+import {join} from 'path';
+import fs from "node:fs/promises"
+import { statSync } from 'fs';
+import { homedir } from 'os';
+
 
 
 export function cmd_up(current_directory, args) {
@@ -31,7 +34,7 @@ export function cmd_cd(current_directory, args) {
 }
 
 
-export async function cmd_ls(working_directory, args) {
+export function cmd_ls(working_directory, args) {
     if (args.length > 1) {
         console.log("too many arguments");
         return;
@@ -39,18 +42,23 @@ export async function cmd_ls(working_directory, args) {
 
     let directory_to_list = args.length === 0 ? working_directory : args[0];
 
-    if (!fs.existsSync(directory_to_list)) {
+    if (directory_to_list.startsWith('~')){
+        directory_to_list = join(homedir(), directory_to_list.slice(1));
+    }
+
+    const stats = statSync(directory_to_list);
+    if (!stats.isDirectory()) {
         console.log("wrong path. please check.");
         return;
     }
 
-    const files = await readdir(directory_to_list, {withFileTypes: true});
-    files.forEach(file => {
-        if (file.isDirectory()) {
-            console.log(`${file.name}/`);
-        } else {
-            console.log(file.name)
-        }
+    fs.readdir(directory_to_list, {withFileTypes: true}).then(files => {
+        files.forEach(file => {
+            if (file.isDirectory()) {
+                console.log(`${file.name}/`);
+            } else {
+                console.log(file.name)
+            }
+        });
     });
-
-}
+};

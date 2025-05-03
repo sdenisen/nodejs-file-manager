@@ -1,5 +1,5 @@
 import os from "os";
-export async function cmd_os(working_directory, args){
+export function cmd_os(working_directory, args){
     if (args.length > 1) {
         console.log("Too many arguments");
         return;
