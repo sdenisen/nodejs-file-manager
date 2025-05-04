@@ -53,6 +53,9 @@ const main_loop = () => {
         let args_filtered = args.filter(str => str.trim() !== "");
         switch (command_name){
             case "":
+                if (args_filtered.length){
+                    console.log("Invalid input");
+                }
                 break;
 
             case ".exit":
