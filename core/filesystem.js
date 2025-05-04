@@ -3,6 +3,7 @@ import process from "node:process"
 import fs from 'node:fs';
 import fsPromises from 'fs/promises';
 import { constants } from 'fs';
+import {is_path_exists} from "../tools/is_path_exists.js";
 
 export function cmd_cat(working_directory, args){
     // Read file and print it's content in console (should be done using Readable stream):
@@ -23,6 +24,9 @@ export function cmd_cat(working_directory, args){
     let dir = directory === "."?  working_directory: directory;
     const full_path_to_file = path.join(dir, file_name);
 
+    if (!is_path_exists(full_path_to_file)){
+        return;
+    }
 
     const stream = fs.createReadStream(full_path_to_file, { encoding: 'utf8' });
     stream.on('error', (error) => {
