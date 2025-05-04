@@ -5,6 +5,7 @@ import {cmd_cd, cmd_ls, cmd_up} from "./core/navigation.js";
 import {cmd_cat, cmd_add, cmd_rn, cmd_cp, cmd_mv, cmd_rm} from "./core/filesystem.js";
 import {cmd_hash, cmd_compress, cmd_decompress} from "./cli/commands.js";
 import {cmd_os} from "./core/operationsystem.js";
+import { homedir } from "os";
 
 const main_loop = () => {
     let working_directory = "";
@@ -13,7 +14,7 @@ const main_loop = () => {
 
     // initiate the working directory:
     const __filename = fileURLToPath(import.meta.url);
-    working_directory = path.dirname(__filename);
+    working_directory = homedir();
 
     for (let i = 0; i < cli_args.length; i++) {
         const argument = cli_args[i];
@@ -32,6 +33,7 @@ const main_loop = () => {
     const greeting = username? `Welcome to the File Manager, ${username}!`: `The name has not been provided!`
     const goodbay = username? `Thank you for using File Manager, ${username}, goodbye!`: `Thank you for using File Manager!`
     console.log(greeting);
+    console.log(`You are currently in ${working_directory} \n`);
 
     const rl = readline.createInterface({
         input: process.stdin,
@@ -65,59 +67,74 @@ const main_loop = () => {
 
             case "cd":
                 working_directory = cmd_cd(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "up":
                 working_directory = cmd_up(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "ls":
                 cmd_ls(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "cat":
                 cmd_cat(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "add":
                 cmd_add(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "rn":
                 cmd_rn(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "cp":
                 cmd_cp(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "mv":
                 cmd_mv(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "rm":
                 cmd_rm(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "hash":
                 cmd_hash(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "compress":
                 cmd_compress(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "decompress":
                 cmd_decompress(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             case "os":
                 cmd_os(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
                 break;
 
             default:
                 console.log("Invalid input");
         }
+
+
     });
 
 
