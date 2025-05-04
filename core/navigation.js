@@ -53,12 +53,20 @@ export function cmd_ls(working_directory, args) {
     }
 
     fs.readdir(directory_to_list, {withFileTypes: true}).then(files => {
-        files.forEach(file => {
-            if (file.isDirectory()) {
-                console.log(`${file.name}/`);
+        let r_files = []
+        let r_dirs = []
+        let r = []
+        files.forEach((file) => {
+            if (file.isDirectory()){
+                r_dirs.push({"Name": file.name, "Type": file.isDirectory() ? "directory" : "file" })
             } else {
-                console.log(file.name)
+                r_files.push({"Name": file.name, "Type": file.isDirectory() ? "directory" : "file" })
             }
         });
+        r_dirs.sort()
+        r_files.sort()
+        r.push.apply(r, r_dirs)
+        r.push.apply(r, r_files)
+        console.table(r);
     });
 };
