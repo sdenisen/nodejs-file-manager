@@ -25,12 +25,16 @@ export function cmd_cd(current_directory, args) {
     }
 
     let directory_to_set = args[0];
-    if (!fs.existsSync(directory_to_set)) {
-        console.log("wrong path. please check.");
-
+    if (directory_to_set.startsWith('~')){
+        directory_to_set = join(homedir(), directory_to_set.slice(1));
     }
 
+    const stats = statSync(directory_to_set);
+    if (!stats.isDirectory()) {
+        console.log("wrong path. please check.");
+    }
     return directory_to_set;
+
 }
 
 
