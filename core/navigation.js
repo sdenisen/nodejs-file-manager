@@ -5,6 +5,20 @@ import { statSync } from 'fs';
 import { homedir } from 'os';
 
 
+function check_existing(directory_to_check){
+    try{
+        statSync(directory_to_check);
+        return true;
+    } catch (error) {
+        if (error.code === "ENOENT"){
+            console.error('Error: Path does not exist.');
+            return false;
+        } else{
+            console.error('Operation failed:', error);
+        }
+    }
+}
+
 
 export function cmd_up(current_directory, args) {
     current_directory = path.dirname(current_directory);
@@ -29,9 +43,13 @@ export function cmd_cd(current_directory, args) {
         directory_to_set = join(homedir(), directory_to_set.slice(1));
     }
 
+    if (!check_existing(directory_to_set)){
+        return current_directory;
+    }
+
     const stats = statSync(directory_to_set);
     if (!stats.isDirectory()) {
-        console.log("wrong path. please check.");
+        console.log("Wrong path. please check.");
     }
     return directory_to_set;
 
@@ -48,6 +66,10 @@ export function cmd_ls(working_directory, args) {
 
     if (directory_to_list.startsWith('~')){
         directory_to_list = join(homedir(), directory_to_list.slice(1));
+    }
+
+    if (!check_existing(directory_to_list)){
+        return;
     }
 
     const stats = statSync(directory_to_list);
