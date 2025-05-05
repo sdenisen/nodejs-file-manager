@@ -101,37 +101,31 @@ export function cmd_rn(working_directory, args){
     }
 
     const args_path_to_file = args[0];
+    const full_path_to_file = path.isAbsolute(args_path_to_file) ? args_path_to_file : path.resolve(working_directory, args_path_to_file);
+
+    if (!is_path_exists(full_path_to_file)){
+        return;
+    }
+
     const args_new_file_name = args[1];
-    const old_directory = path.dirname(args_path_to_file);
-    const old_file_name = path.basename(args_path_to_file);
-    const new_file_name = path.basename(args_new_file_name);
+    const new_directory = path.dirname(full_path_to_file);
+    const full_path_to_new_file = path.join(new_directory, args_new_file_name)
 
-    let old_dir = old_directory === "."?  working_directory: old_directory;
-    const full_path_to_old_file = path.join(old_dir, old_file_name);
-    const full_path_to_new_file = path.join(old_dir, new_file_name);
-    let is_error = false
-    fsPromises.stat(full_path_to_old_file).catch(error => {
-        console.log(`The file ${old_file_name} doesn't exist.`);
-        is_error = true;
-    });
-    if (is_error) return;
-
-    fsPromises.stat(full_path_to_new_file).then(() => {
-        console.log(`The file ${new_file_name} already exist.`);
-        is_error = true;
-    }).catch((error) => {
-        if(error.code !== 'ENOENT'){
-            Promise.reject(error)
+    try {
+        statSync(full_path_to_new_file);
+        console.log(`The file ${args_new_file_name} already exist.`)
+        return;
+    } catch (error) {
+        if (error.code === "ENOENT") {
+            fs.rename(full_path_to_file, full_path_to_new_file, (error) => {
+                if (error){
+                    console.log(`${error.message}`);
+                }
+            });
+        } else {
+            console.error('Operation failed:', error);
         }
-    });
-
-    if (is_error) return;
-
-    fsPromises.rename(old_file_name, new_file_name).catch((error) => {
-        if (error.code === 'ENOENT'){
-            console.log(`${error.message}`);
-        }
-    });
+    }
 }
 
 export function cmd_cp(working_directory, args){
