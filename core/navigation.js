@@ -24,11 +24,13 @@ export function cmd_cd(current_directory, args) {
     }
 
     let directory_to_set = args[0];
-    if (directory_to_set.startsWith('~')){
+    if (directory_to_set.startsWith('~')) {
         directory_to_set = join(homedir(), directory_to_set.slice(1));
     }
 
-    if (!is_path_exists(directory_to_set)){
+    directory_to_set = path.isAbsolute(directory_to_set) ? directory_to_set : path.resolve(current_directory, directory_to_set);
+
+    if (!is_path_exists(directory_to_set)) {
         return current_directory;
     }
 
@@ -49,11 +51,13 @@ export function cmd_ls(working_directory, args) {
 
     let directory_to_list = args.length === 0 ? working_directory : args[0];
 
-    if (directory_to_list.startsWith('~')){
+    if (directory_to_list.startsWith('~')) {
         directory_to_list = join(homedir(), directory_to_list.slice(1));
     }
 
-    if (!is_path_exists(directory_to_list)){
+    directory_to_list = path.isAbsolute(directory_to_list) ? directory_to_list : path.resolve(working_directory, directory_to_list);
+
+    if (!is_path_exists(directory_to_list)) {
         return;
     }
 
@@ -68,10 +72,10 @@ export function cmd_ls(working_directory, args) {
         let r_dirs = []
         let r = []
         files.forEach((file) => {
-            if (file.isDirectory()){
-                r_dirs.push({"Name": file.name, "Type": file.isDirectory() ? "directory" : "file" })
+            if (file.isDirectory()) {
+                r_dirs.push({"Name": file.name, "Type": file.isDirectory() ? "directory" : "file"})
             } else {
-                r_files.push({"Name": file.name, "Type": file.isDirectory() ? "directory" : "file" })
+                r_files.push({"Name": file.name, "Type": file.isDirectory() ? "directory" : "file"})
             }
         });
         r_dirs.sort()
