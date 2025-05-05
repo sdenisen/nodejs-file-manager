@@ -4,25 +4,18 @@ import fs from 'node:fs';
 import fsPromises from 'fs/promises';
 import { constants } from 'fs';
 import {is_path_exists} from "../tools/is_path_exists.js";
+import {is_args_correct} from "../tools/is_args_correct.js";
 
 export function cmd_cat(working_directory, args){
     // Read file and print it's content in console (should be done using Readable stream):
     // cat path_to_file
-    if (args.length > 1) {
-        console.log("too many arguments");
+
+    if (!is_args_correct(args)){
         return;
     }
 
-    if (args.length === 0) {
-        console.log("no any arguments passed")
-        return;
-    }
-
-    const directory = path.dirname(args[0]);
-    const file_name = path.basename(args[0]);
-
-    let dir = directory === "."?  working_directory: directory;
-    const full_path_to_file = path.join(dir, file_name);
+    const path_to_file = args[0];
+    const full_path_to_file = path.isAbsolute(path_to_file) ? path_to_file : path.resolve(working_directory, path_to_file);
 
     if (!is_path_exists(full_path_to_file)){
         return;
