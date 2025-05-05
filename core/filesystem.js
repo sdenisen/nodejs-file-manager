@@ -155,15 +155,18 @@ export function cmd_cp(working_directory, args){
     }
 
     const destination = path.join(destination_path_to_file, path.basename(init_path_to_file));
-    console.log("we are here...")
-    fs.copyFile(full_path_to_file, destination, constants.COPYFILE_EXCL, (error) => {
-        if (error.code === "EEXIST") {
-                console.error("The file already exist");
-        }
-        if (error.code === "ENOENT") {
-              console.error(`Something go wrong ${error}`);
-        }
+    // copy action.
+    const readStream = fs.createReadStream(full_path_to_file);
+    const writeStream = fs.createWriteStream(destination);
+
+    readStream.on('error', (error) => {
+        reject(`Error reading source file: ${error.message}`);
     });
+    writeStream.on('error', (error) => {
+        reject(`Error writing destination file: ${error.message}`);
+    });
+
+    readStream.pipe(writeStream);
 }
 
 export function cmd_mv(working_directory, args){
@@ -183,30 +186,21 @@ export function cmd_mv(working_directory, args){
 
     // parse arguments.
     let is_error = false;
-    const source_path_to_file = args[0];
+    const init_path_to_file = args[0];
+    const full_path_to_file = path.isAbsolute(init_path_to_file) ? init_path_to_file : path.resolve(working_directory, init_path_to_file);
+
     const destination_directory = args[1];
-    const destination_path_to_file = path.join(destination_directory, path.basename(source_path_to_file));
+    const destination_path_to_file = path.isAbsolute(destination_directory) ? destination_directory : path.resolve(working_directory, destination_directory);
 
-    fsPromises.stat(source_path_to_file).catch(error => {
-        is_error = true;
-        console.log(`something go wrong ${error.message}`);
-    });
-    if (is_error) return;
+    if (!is_path_exists(destination_path_to_file) || !is_path_exists(full_path_to_file)){
+        return;
+    }
 
-    fsPromises.stat(destination_path_to_file).then(() => {
-        is_error = true;
-        console.log("The file already exist");
-    }).catch((error) => {
-        if (error.code !== "ENOENT"){
-            console.log(`something go wrong ${error.message}`)
-            Promise.reject();
-        }
-    });
-    if (is_error) return;
+    const destination = path.join(destination_path_to_file, path.basename(init_path_to_file));
 
     // move action.
-    const readStream = fs.createReadStream(source_path_to_file);
-    const writeStream = fs.createWriteStream(destination_path_to_file);
+    const readStream = fs.createReadStream(full_path_to_file);
+    const writeStream = fs.createWriteStream(destination);
 
     readStream.on('error', (error) => {
         reject(`Error reading source file: ${error.message}`);
@@ -216,11 +210,9 @@ export function cmd_mv(working_directory, args){
     });
 
     writeStream.on('close', () => {
-            fs.unlink(source_path_to_file, (err) => {
+            fs.unlink(full_path_to_file, (err) => {
                 if (err) {
-                    Promise.reject(`Error deleting source file: ${err.message}`);
-                } else {
-                    Promise.resolve('File moved successfully.');
+                    console.error(`Error deleting source file: ${err.message}`);
                 }
             });
         });
