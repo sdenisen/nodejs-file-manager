@@ -230,31 +230,22 @@ export function cmd_mv(working_directory, args){
 
 
 export function cmd_rm(working_directory, args){
-    // Delete file:
-    // rm path_to_file
-
-     if (args.length > 1) {
-        console.log("Too many arguments");
-        return;
-    }
-
-    if (args.length === 0) {
-        console.log("Missed some required arguments")
-        return;
-    }
+    // Delete file: rm path_to_file
+    is_args_correct(args)
 
     // parse arguments.
-    let is_error = false;
     const file_to_remove = args[0];
+    const full_path_to_file = path.isAbsolute(file_to_remove) ? file_to_remove : path.resolve(working_directory, file_to_remove);
 
-    fsPromises.stat(file_to_remove).catch(error => {
-        is_error = true;
-        console.log(`something go wrong ${error.message}`);
+    if (!is_path_exists(full_path_to_file)){
+        return;
+    }
+
+    fs.unlink(full_path_to_file, (error) => {
+        if (error) {
+              console.error(`Operation failed: ${error}`);
+        }
     });
-    if (is_error) return;
-
-    // remove action.
-    fsPromises.unlink(file_to_remove);
 }
 
 
