@@ -50,27 +50,21 @@ export function cmd_compress(working_directory, args){
         return;
     }
 
-    // parse arguments.
-    const path_to_file = args[0];
-    const path_to_destination = args[1];
+    const init_path_to_file = args[0];
+    const full_path_to_file = path.isAbsolute(init_path_to_file) ? init_path_to_file : path.resolve(working_directory, init_path_to_file);
 
-    let is_error = false;
-    fsPromises.stat(path_to_file).catch(error => {
-        is_error = true;
-        console.log(`something go wrong ${error.message}`);
-    });
-    if (is_error) return;
+    const destination_directory = args[1];
+    const destination_path_to_file = path.isAbsolute(destination_directory) ? destination_directory : path.resolve(working_directory, destination_directory);
 
-    fsPromises.stat(path_to_destination).catch(error => {
-        is_error = true;
-        console.log(`something go wrong ${error.message}`);
-    });
+    if (!is_path_exists(destination_path_to_file) || !is_path_exists(full_path_to_file)){
+        return;
+    }
 
-    const archive_file = path.join(path_to_destination, path.basename(path_to_file) + ".gz");
+    const archive_file = path.join(destination_path_to_file, path.basename(init_path_to_file) + ".gz");
 
     // compress action.
     pipeline(
-      fs.createReadStream(path_to_file),
+      fs.createReadStream(full_path_to_file),
       zlib.createGzip(),
       fs.createWriteStream(archive_file)
     );
