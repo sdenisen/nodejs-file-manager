@@ -5,6 +5,7 @@ import fsPromises from 'fs/promises';
 import { constants } from 'fs';
 import {is_path_exists} from "../tools/is_path_exists.js";
 import {is_args_correct} from "../tools/is_args_correct.js";
+import {statSync} from 'node:fs';
 
 export function cmd_cat(working_directory, args){
     // Read file and print it's content in console (should be done using Readable stream):
@@ -58,6 +59,31 @@ export function cmd_add(working_directory, args){
            console.error(`Something go wrong: ${error.message}`);
        }
     });
+}
+
+export function cmd_mkdir(working_directory, args){
+    if (!is_args_correct(args)){
+        return;
+    }
+
+    const path_to_directory = args[0];
+    const full_path_to_file = path.isAbsolute(path_to_directory) ? path_to_directory : path.resolve(working_directory, path_to_directory);
+    console.log(full_path_to_file)
+    try {
+        statSync(full_path_to_file);
+        console.log("The directory already exists.")
+        return;
+    } catch (error) {
+        if (error.code === "ENOENT") {
+            fs.mkdir(full_path_to_file, (error) => {
+                if (error){
+                    console.log("Operation failed:", error)
+                }
+            });
+        } else {
+            console.error('Operation failed:', error);
+        }
+    }
 }
 
 export function cmd_rn(working_directory, args){

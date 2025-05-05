@@ -2,7 +2,7 @@ import path from "path";
 import readline from "node:readline";
 import {fileURLToPath} from "url";
 import {cmd_cd, cmd_ls, cmd_up} from "./core/navigation.js";
-import {cmd_cat, cmd_add, cmd_rn, cmd_cp, cmd_mv, cmd_rm} from "./core/filesystem.js";
+import {cmd_cat, cmd_add, cmd_rn, cmd_cp, cmd_mv, cmd_rm, cmd_mkdir} from "./core/filesystem.js";
 import {cmd_hash, cmd_compress, cmd_decompress} from "./cli/commands.js";
 import {cmd_os} from "./core/operationsystem.js";
 import { homedir } from "os";
@@ -89,6 +89,11 @@ const main_loop = () => {
                 cmd_add(working_directory, args_filtered);
                 console.log(`You are currently in ${working_directory}`);
                 break;
+
+            case "mkdir":
+                cmd_mkdir(working_directory, args_filtered);
+                console.log(`You are currently in ${working_directory}`);
+                break
 
             case "rn":
                 cmd_rn(working_directory, args_filtered);
