@@ -145,34 +145,25 @@ export function cmd_cp(working_directory, args){
     // parse arguments.
     let is_error = false;
     const init_path_to_file = args[0];
+    const full_path_to_file = path.isAbsolute(init_path_to_file) ? init_path_to_file : path.resolve(working_directory, init_path_to_file);
+
     const destination_directory = args[1];
-    const destination_path_to_file = path.join(destination_directory, path.basename(init_path_to_file));
+    const destination_path_to_file = path.isAbsolute(destination_directory) ? destination_directory : path.resolve(working_directory, destination_directory);
 
+    if (!is_path_exists(destination_path_to_file) || !is_path_exists(full_path_to_file)){
+        return;
+    }
 
-    fsPromises.stat(init_path_to_file).catch(error => {
-        is_error = true;
-    });
-    if (is_error) return;
-
-    fsPromises.stat(destination_directory).catch(error => {
-        is_error = true;
-        console.log(error.message);
-    });
-    if (is_error) return;
-
-    console.log("we are gete")
-    fsPromises.copyFile(init_path_to_file, destination_path_to_file, constants.COPYFILE_EXCL)
-        .catch(error => {
-            if (error.code === "ERR_FS_CP_EEXIST") {
+    const destination = path.join(destination_path_to_file, path.basename(init_path_to_file));
+    console.log("we are here...")
+    fs.copyFile(full_path_to_file, destination, constants.COPYFILE_EXCL, (error) => {
+        if (error.code === "EEXIST") {
                 console.error("The file already exist");
-                Promise.reject();
-            }
-            if (error.code === "ENOENT") {
-              console.error(`Something go wrong ${error.message}`);
-              Promise.reject();
-            }
-            console.log(error.message)
-        });
+        }
+        if (error.code === "ENOENT") {
+              console.error(`Something go wrong ${error}`);
+        }
+    });
 }
 
 export function cmd_mv(working_directory, args){
