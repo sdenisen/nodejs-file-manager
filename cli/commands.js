@@ -5,6 +5,7 @@ import zlib from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 import path from "path";
 import remove_last_extension from "./parser.js"
+import {is_path_exists} from "../tools/is_path_exists.js";
 
 export function cmd_hash(working_directory, args){
     // Calculate hash for file and print it into console
@@ -22,15 +23,16 @@ export function cmd_hash(working_directory, args){
 
     // parse arguments.
     const file_path = args[0];
+    const full_path_to_file = path.isAbsolute(file_path) ? file_path : path.resolve(working_directory, file_path);
+
+    if(!is_path_exists(full_path_to_file)){
+        return;
+    }
 
     // hash action.
-    fsPromises.stat(file_path).then(() => {
-            fsPromises.readFile(file_path).then(file_buffer => {
-                const hash = createHash('sha256').update(file_buffer).digest('hex');
-                console.log(hash);
-            });
-    }).catch(error => {
-        console.log("error during reading the file");
+    fsPromises.readFile(full_path_to_file).then(file_buffer => {
+        const hash = createHash('sha256').update(file_buffer).digest('hex');
+        console.log(hash);
     });
 }
 
